@@ -2,19 +2,73 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import Notiflix from 'notiflix';
 
-const DELAY = 1000;
-const dateInput = document.querySelector('input#datetime-picker');
-const btnStart = document.querySelector('[data-start]');
-btnStart.disabled = true;
-const dayEl = document.querySelector('[data-days]');
-const hourEl = document.querySelector('[data-hours]');
-const minuteEl = document.querySelector('[data-minutes]');
-const secondEl = document.querySelector('[data-seconds]');
+const refs = {
+  DELAY: 1000,
+  dateInput: document.querySelector('#datetime-picker'),
+  btnStart: document.querySelector('[data-start]'),
+  dayEl: document.querySelector('[data-days]'),
+  hourEl: document.querySelector('[data-hours]'),
+  minuteEl: document.querySelector('[data-minutes]'),
+  secondEl: document.querySelector('[data-seconds]'),
+};
+
+const { DELAY, dateInput, btnStart, dayEl, hourEl, minuteEl, secondEl } = refs;
+
+refs.btnStart.disabled = true;
+let chosenDate;
+
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  isActive: false,
+  onClose(selectedDates) {
+    if (this.isActive) {
+      return;
+    } else {
+      chosenDate = selectedDates[0].getTime();
+      checkDate(chosenDate);
+      options.isActive = true;
+    }
+  },
+};
+
+const flatpickr = flatpickr(dateInput, options);
+
+function checkDate(date) {
+  if (date < Date.now()) {
+    Notiflix.Notify.failure('Please choose a date in the future', {
+      timeout: 6000,
+    });
+  } else {
+    btnStart.disabled = false;
+  }
+}
+
+function onBtnStart(event) {
+  const intervalID = setInterval(() => {
+    const currentTime = Date.now();
+    if (chosenDate > currentTime) {
+      let difference = chosenDate - currentTime;
+
+      const { days, hours, minutes, seconds } = convertMs(difference);
+      const amountOfTime = `${days}:${hours}:${minutes}:${seconds}`;
+
+      updateClockFace({ days, hours, minutes, seconds });
+    } else {
+      clearInterval(intervalID);
+      const { days, hours, minutes, seconds } = convertMs(difference);
+      updateClockFace({ days, hours, minutes, seconds });
+    }
+  }, DELAY);
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
 
 function convertMs(ms) {
-  function addLeadingZero(value) {
-    return String(value).padStart(2, '0');
-  }
   // Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
@@ -34,49 +88,13 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  isActive: false,
-  onClose(selectedDates) {
-    if (this.isActive) {
-      return;
-    }
-    let selectedDate = selectedDates[0].getTime();
+function updateClockFace({ days, hours, minutes, seconds }) {
+  dayEl.textContent = `${days}`;
+  hourEl.textContent = `${hours}`;
+  minuteEl.textContent = `${minutes}`;
+  secondEl.textContent = `${seconds}`;
+}
 
-    if (selectedDate < Date.now()) {
-      Notiflix.Notify.failure('Please choose a date in the future', {
-        timeout: 6000,
-      });
-    } else {
-      btnStart.disabled = false;
-      this.isActive = true;
+btnStart.addEventListener('click', onBtnStart);
 
-      function inBtnStart(event) {
-        const intervalId = setInterval(() => {
-          const currentTime = Date.now();
-
-          let difference = selectedDate - currentTime;
-
-          const { days, hours, minutes, seconds } = convertMs(difference);
-          const amountOfTime = `${days}:${hours}:${minutes}:${seconds}`;
-
-          dayEl.textContent = `${days}`;
-          hourEl.textContent = `${hours}`;
-          minuteEl.textContent = `${minutes}`;
-          secondEl.textContent = `${seconds}`;
-
-          if (amountOfTime === `00:00:00:00`) {
-            clearInterval(intervalId);
-          }
-        }, DELAY);
-      }
-
-      btnStart.addEventListener('click', inBtnStart);
-    }
-  },
-};
-
-const fp = flatpickr(dateInput, options);
+console.log(chosenDate);
