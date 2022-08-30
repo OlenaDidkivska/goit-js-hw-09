@@ -34,7 +34,7 @@ const options = {
   },
 };
 
-const flatpickr = flatpickr(dateInput, options);
+const fp = flatpickr(dateInput, options);
 
 function checkDate(date) {
   if (date < Date.now()) {
