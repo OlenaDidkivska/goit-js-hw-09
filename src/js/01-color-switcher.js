@@ -8,12 +8,14 @@ const refs = {
   btnStop: document.querySelector('[data-stop]'),
 };
 
+let timerId = null;
+
 function onBtnStartClick() {
+  refs.btnStart.disabled = true;
   timerId = setInterval(() => {
     const color = getRandomHexColor();
     refs.bodyEl.style.background = color;
   }, 1000);
-  refs.btnStart.disabled = true;
 }
 
 function onBtnStopClick() {
