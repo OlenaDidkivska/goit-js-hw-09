@@ -6,6 +6,9 @@ const refs = {
   DELAY: 1000,
   dateInput: document.querySelector('#datetime-picker'),
   btnStart: document.querySelector('[data-start]'),
+  timer: document.querySelector('.timer'),
+  field: document.querySelectorAll('.field'),
+  value: document.querySelectorAll('.value'),
   dayEl: document.querySelector('[data-days]'),
   hourEl: document.querySelector('[data-hours]'),
   minuteEl: document.querySelector('[data-minutes]'),
@@ -13,6 +16,20 @@ const refs = {
 };
 
 const { DELAY, dateInput, btnStart, dayEl, hourEl, minuteEl, secondEl } = refs;
+
+refs.timer.style.display = 'flex';
+
+refs.field.forEach(element => {
+  element.style.margin = '30px 5px';
+  element.style.padding = '20px 5px';
+  element.style.fontWeight = '600';
+  element.style.textAlign = 'center';
+});
+
+refs.value.forEach(element => {
+  element.style.display = 'block';
+  element.style.fontSize = '30px';
+});
 
 refs.btnStart.disabled = true;
 let chosenDate;
